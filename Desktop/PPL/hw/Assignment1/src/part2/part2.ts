@@ -7,6 +7,8 @@ const stringToArray = R.split("");
 /* Question 1 */
 export const countLetters: undefined = undefined
 
+
+
 /* Question 2 */
 export const isPaired: undefined = undefined
 
