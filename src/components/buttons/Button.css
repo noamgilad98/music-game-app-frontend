@@ -1,4 +1,4 @@
-.submit-button {
+.button {
     background-color: #61dafb;
     border: none;
     color: black;
@@ -13,6 +13,6 @@
     transition: background-color 0.3s;
 }
 
-.submit-button:hover {
+.button:hover {
     background-color: #21a1f1;
 }
