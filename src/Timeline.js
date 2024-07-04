@@ -1,25 +1,27 @@
 import React from 'react';
 import { useDrop } from 'react-dnd';
+import Card from './Card';
+import './Timeline.css';
 
-const Timeline = ({ timeline, onDrop }) => {
-  const [{ isOver }, drop] = useDrop(() => ({
+const Timeline = ({ timeline, onDropCard }) => {
+  const [{ isOver }, drop] = useDrop({
     accept: 'CARD',
-    drop: (item) => onDrop(item.card),
+    drop: (item, monitor) => {
+      const delta = monitor.getDifferenceFromInitialOffset();
+      const index = Math.round(delta.x / 100); // Assume each card is 100px wide
+      onDropCard(item.card, index);
+    },
     collect: (monitor) => ({
       isOver: !!monitor.isOver(),
     }),
-  }));
+  });
 
   return (
-    <div ref={drop} className="timeline" style={{ backgroundColor: isOver ? 'lightgray' : 'white' }}>
-      {timeline.map((card, index) => (
-        <div key={index} className="card">
-          <p>{card.songName}</p>
-          <p>{card.artist}</p>
-          <p>{card.year}</p>
-        </div>
-      ))}
-    </div>
+      <div ref={drop} className={`timeline ${isOver ? 'hover' : ''}`}>
+        {timeline.map((card, index) => (
+            <Card key={card.id} card={card} />
+        ))}
+      </div>
   );
 };
 

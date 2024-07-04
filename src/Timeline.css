@@ -1,0 +1,12 @@
+.timeline {
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+    background: #444;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.timeline.hover {
+    background: #555;
+}
