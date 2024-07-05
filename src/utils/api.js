@@ -46,16 +46,30 @@ export const getCard = async (playerId) => {
     return response.json();
 };
 
-export const submitCard = async (playerId, cards) => {
+export const submitCard = async (playerId, card) => {
     const response = await fetch(`${API_URL}/api/game/submit-card?playerId=${playerId}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(cards),
+        body: JSON.stringify(card),
     });
     if (!response.ok) {
         throw new Error('Failed to submit card');
+    }
+    return response.json();
+};
+
+export const submitAndValidate = async (playerId, card) => {
+    const response = await fetch(`${API_URL}/api/game/submit-and-validate?playerId=${playerId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(card),
+    });
+    if (!response.ok) {
+        throw new Error('Failed to submit and validate card');
     }
     return response.json();
 };

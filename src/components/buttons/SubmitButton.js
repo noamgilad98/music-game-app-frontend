@@ -1,12 +1,7 @@
 import React from 'react';
-import './Button.css';
 
-function SubmitButton({ onSubmit }) {
-    return (
-        <button className="button submit-button" onClick={onSubmit}>
-            Submit Cards
-        </button>
-    );
-}
+const SubmitButton = ({ onSubmit }) => {
+    return <button onClick={onSubmit}>Submit Timeline</button>;
+};
 
 export default SubmitButton;

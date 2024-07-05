@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import './Button.css';
 
 const StartGameButton = ({ onStartGame }) => {
     const [playerName, setPlayerName] = useState('');
 
-    const handleStart = () => {
-        if (playerName.trim()) {
+    const handleStartGame = () => {
+        if (playerName.trim() !== '') {
             onStartGame(playerName);
         }
     };
@@ -14,11 +13,11 @@ const StartGameButton = ({ onStartGame }) => {
         <div>
             <input
                 type="text"
+                placeholder="Enter player name"
                 value={playerName}
                 onChange={(e) => setPlayerName(e.target.value)}
-                placeholder="Enter your name"
             />
-            <button className="button" onClick={handleStart}>Start Game</button>
+            <button onClick={handleStartGame}>Start Game</button>
         </div>
     );
 };

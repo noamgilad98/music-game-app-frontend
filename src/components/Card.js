@@ -1,14 +1,20 @@
 import React from 'react';
-import '../styles/Card.css';
+import { useDrag } from 'react-dnd';
 
-function Card({ card }) {
+const Card = ({ card }) => {
+    const [{ isDragging }, drag] = useDrag(() => ({
+        type: 'CARD',
+        item: { id: card.id },
+        collect: (monitor) => ({
+            isDragging: !!monitor.isDragging(),
+        }),
+    }));
+
     return (
-        <div className="card">
-            <h3>{card.songName}</h3>
-            <p>{card.artist}</p>
-            <p>{card.year}</p>
+        <div ref={drag} style={{ opacity: isDragging ? 0.5 : 1, padding: '10px', border: '1px solid gray', cursor: 'move' }}>
+            {card.name}
         </div>
     );
-}
+};
 
 export default Card;

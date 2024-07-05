@@ -1,100 +1,80 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import StartGameButton from './components/buttons/StartGameButton';
 import GetCardButton from './components/buttons/GetCardButton';
 import SubmitButton from './components/buttons/SubmitButton';
 import Timeline from './components/Timeline';
 import './styles/App.css';
-import { startGame, getCard } from './utils/api';
-import { getAccessToken, getTrack } from './utils/SpotifyService';
+import { startGame, getCard, submitAndValidate } from './utils/api';
 
 function App() {
     const [player, setPlayer] = useState(null);
-    const [cards, setCards] = useState([]);
-    const [currentTrackUri, setCurrentTrackUri] = useState(null);
-    const accessTokenRef = useRef(null);
-    const audioRef = useRef(null);  // Define audioRef here
-
-    useEffect(() => {
-        const clientId = process.env.REACT_APP_SPOTIFY_CLIENT_ID;
-        const clientSecret = process.env.REACT_APP_SPOTIFY_CLIENT_SECRET;
-
-        const fetchAccessToken = async () => {
-            try {
-                const token = await getAccessToken(clientId, clientSecret);
-                accessTokenRef.current = token;
-                console.log('Access token fetched:', token);
-            } catch (error) {
-                console.error('Error fetching access token:', error);
-            }
-        };
-
-        fetchAccessToken();
-    }, []);
+    const [timeline, setTimeline] = useState([]);
+    const [deck, setDeck] = useState([]);
 
     const handleStartGame = async (playerName) => {
-        const { player, card } = await startGame(playerName);
-        setPlayer(player);
-        setCards([card]);
-        playSong(card.spotifyCode);
-    };
-
-    const handleAddCard = async (playerId) => {
-        const card = await getCard(playerId);
-        setCards([...cards, card]);
-        playSong(card.spotifyCode);
-    };
-
-    const playSong = (spotifyCode) => {
-        if (audioRef.current) {
-            audioRef.current.pause();
+        try {
+            const { player, card } = await startGame(playerName);
+            setPlayer(player);
+            setTimeline([card]);
+        } catch (error) {
+            console.error('Failed to start game', error);
         }
-        setCurrentTrackUri(spotifyCode);
     };
 
-    useEffect(() => {
-        const fetchAndPlaySong = async () => {
-            if (currentTrackUri) {
-                try {
-                    const trackId = currentTrackUri.split(':').pop();
-                    const track = await getTrack(trackId, accessTokenRef.current);
+    const handleGetCard = async () => {
+        if (!player) return;
+        try {
+            const card = await getCard(player.id);
+            setDeck((prevDeck) => [...prevDeck, card]);
+        } catch (error) {
+            console.error('Failed to get card', error);
+        }
+    };
 
-                    if (track && track.preview_url) {
-                        if (audioRef.current) {
-                            audioRef.current.src = track.preview_url;
-                            audioRef.current.play();
-                            console.log('Playing track:', track.preview_url);
-                        }
-                    } else {
-                        console.error('No preview URL available for this track');
-                    }
-                } catch (error) {
-                    console.error('Error playing song:', error);
-                }
+    const handleCardDrop = (cardId) => {
+        const card = deck.find(c => c.id === cardId);
+        if (card) {
+            setDeck(deck.filter(c => c.id !== cardId));
+            setTimeline(timeline.concat(card));
+        }
+    };
+
+    const handleSubmit = async () => {
+        if (!player) return;
+        try {
+            const card = deck[deck.length - 1];
+            const response = await submitAndValidate(player.id, card);
+            if (response.cardSubmitted) {
+                setTimeline((prevTimeline) => [...prevTimeline, { ...card, faceUp: true }]);
+                setDeck((prevDeck) => prevDeck.slice(0, -1));
             }
-        };
-
-        fetchAndPlaySong();
-    }, [currentTrackUri]);
+            if (response.isTimelineValid) {
+                alert('Timeline is valid!');
+            } else {
+                alert('Timeline is invalid!');
+            }
+            if (response.gameWon) {
+                alert('You won the game!');
+            }
+        } catch (error) {
+            console.error('Failed to submit and validate card', error);
+        }
+    };
 
     return (
         <div className="App">
             <header className="App-header">
                 <h1>Music Game</h1>
             </header>
-            <main>
-                {!player ? (
-                    <StartGameButton onStartGame={handleStartGame} />
-                ) : (
-                    <>
-                        <Timeline cards={cards} />
-                        <div className="button-group">
-                            <GetCardButton onAddCard={() => handleAddCard(player.id)} playerId={player.id} />
-                            <SubmitButton playerId={player.id} cards={cards} />
-                        </div>
-                    </>
-                )}
-                <audio ref={audioRef} />
-            </main>
+            {!player ? (
+                <StartGameButton onStartGame={handleStartGame} />
+            ) : (
+                <>
+                    <GetCardButton onAddCard={handleGetCard} />
+                    <SubmitButton onSubmit={handleSubmit} />
+                    <Timeline cards={timeline} onCardDrop={handleCardDrop} />
+                </>
+            )}
         </div>
     );
 }
