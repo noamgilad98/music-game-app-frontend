@@ -25,6 +25,7 @@ export const getAccessToken = async (clientId, clientSecret) => {
 };
 
 export const startGame = async (playerName) => {
+    console.log(`Starting game for player: ${playerName}`);
     const response = await fetch(`${API_URL}/api/game/start`, {
         method: 'POST',
         headers: {
@@ -33,10 +34,13 @@ export const startGame = async (playerName) => {
         body: JSON.stringify({ name: playerName }),
     });
     if (!response.ok) {
+        console.error('Failed to start game');
         throw new Error('Failed to start game');
     }
+    console.log(`Game started successfully for player: ${playerName}`);
     return response.json();
 };
+
 
 export const getCard = async (playerId) => {
     const response = await fetch(`${API_URL}/api/game/get-card?playerId=${playerId}`);
