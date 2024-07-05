@@ -1,31 +1,8 @@
-const API_URL = 'http://localhost:8080'; // Adjust the port if necessary
-
-export const getAccessToken = async (clientId, clientSecret) => {
-    const url = 'https://accounts.spotify.com/api/token';
-    const headers = new Headers({
-        'Authorization': 'Basic ' + btoa(clientId + ':' + clientSecret),
-        'Content-Type': 'application/x-www-form-urlencoded',
-    });
-    const body = new URLSearchParams({
-        'grant_type': 'client_credentials',
-    });
-
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: headers,
-        body: body.toString(),
-    });
-
-    if (!response.ok) {
-        throw new Error('Failed to fetch access token');
-    }
-
-    const data = await response.json();
-    return data.access_token;
-};
+// src/utils/api.js
+const API_URL = 'http://localhost:8080';
 
 export const startGame = async (playerName) => {
-    const response = await fetch(`${API_URL}/api/game/start`, {
+    const response = await fetch(`${API_URL}/api/game/start-game`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -46,16 +23,44 @@ export const getCard = async (playerId) => {
     return response.json();
 };
 
-export const submitCard = async (playerId, cards) => {
+export const submitCard = async (playerId, card) => {
     const response = await fetch(`${API_URL}/api/game/submit-card?playerId=${playerId}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify(cards),
+        body: JSON.stringify(card),
     });
     if (!response.ok) {
         throw new Error('Failed to submit card');
+    }
+    return response.json();
+};
+
+export const submitTimeline = async (playerId, timeline) => {
+    const response = await fetch(`${API_URL}/api/game/submit-timeline?playerId=${playerId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(timeline),
+    });
+    if (!response.ok) {
+        throw new Error('Failed to submit timeline');
+    }
+    return response.json();
+};
+
+export const submitAndValidate = async (playerId, card) => {
+    const response = await fetch(`${API_URL}/api/game/submit-and-validate?playerId=${playerId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(card),
+    });
+    if (!response.ok) {
+        throw new Error('Failed to submit and validate');
     }
     return response.json();
 };
